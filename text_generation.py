@@ -15,24 +15,30 @@ random.manual_seed(0)
 def text_generation(rnn_type='basic_rnn', input_file="shakespeare.txt", sample_len=2000, seed="KING"):
     if rnn_type == "basic_rnn":
         # specify the sequence length, hidden size and number of layers
+        seq_len = 100
+        num_layers = 2
+        hidden_size = 128
 
         # specify train opts
         train_opts = {
-            # "num_epochs":
-            # "lr": 
-            # "batch_size":
-            # "weight_decay":
+            "num_epochs": 120,
+            "lr": 0.001,
+            "batch_size": 128,
+            "weight_decay": 0.0001
         }
 
     elif rnn_type == "lstm_rnn":
         # specify the sequence length, hidden size and number of layers
+        seq_len = 100
+        num_layers = 2
+        hidden_size = 256
 
         # specify train_opts
         train_opts = {
-            # "num_epochs":
-            # "lr":
-            # "batch_size":
-            # "weight_decay":
+            "num_epochs": 120,
+            "lr": 0.001,
+            "batch_size": 128,
+            "weight_decay": 0.0001
         }
         
     else:

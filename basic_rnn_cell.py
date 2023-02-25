@@ -1,4 +1,5 @@
 from torch import nn, Tensor, tanh
+import torch
 from math import sqrt
 
 
@@ -19,11 +20,22 @@ class BasicRNNCell(nn.Module):
 
         # create and initialize parameters W, V, b as described in the text.
         # remember that the parameters are instance variables
+        n = self.vocab_size
+        m = self.hidden_size
+        k = sqrt(1/m)
 
         # W, the input weights matrix has size (n x m) where n is
         # the number of input features and m is the hidden size
+        W = torch.empty((n, m))
+        self.W = W.uniform_(-k, k)
+
         # V, the hidden state weights matrix has size (m, m)
+        V = torch.empty((m, m))
+        self.V = V.uniform_(-k, k)
+
         # b, the vector of bias, has size (m)
+        b = torch.empty(m)
+        self.b = b.uniform_(-k, k)
 
     def forward(self, x, h):
         """
@@ -40,6 +52,8 @@ class BasicRNNCell(nn.Module):
         h: (Tensor) of size (B x m), the new hidden state
 
         """
+        a = self.b + self.W * x + self.V * h
+        h = tanh(a)
 
         return h
 
