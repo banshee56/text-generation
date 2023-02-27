@@ -1,6 +1,6 @@
 from lstm_cell import LSTMCell
 from basic_rnn_cell import BasicRNNCell
-from torch import nn, zeros, empty_like
+from torch import nn, zeros
 
 
 class CustomRNN(nn.Module):
@@ -57,16 +57,34 @@ class CustomRNN(nn.Module):
             the cell state passed in as input.
         """
         # compute the hidden states and cell states (for an lstm_rnn) for each mini-batch in the sequence
-        for l in range(self.num_layers):
-            for t in range(x.shape[1]):     # time steps T
+        outs = zeros((x.shape[0], x.shape[1], h.shape[2]))   # shape (B x T x m)
+
+        # for each time step, we start with one input
+        for t in range(x.shape[1]):
+            x_in = x[:, t, :]           # input volume x_t at time step t, shape (B x n)
+            new_h = zeros((h.shape))    # store hidden states computed at this time step, shape (l x B x m)
+
+            for l in range(self.num_layers):
                 if self.rnn_type == "basic_rnn":
-                    h = self.rnn[l].forward(x[:, t, :], h[l])
+                    # first parameter: the activation from the previous layer, shape (B x n)
+                    # second parameter: the hidden state from the previous time step, shape (B x m)
+                    x_out = self.rnn[l].forward(x_in, h[l])                   # x_out shape (B x m)
 
                 elif self.rnn_type == "lstm_rnn":
-                    h, c = self.rnn[l].forward(x[:, t, :], h[l], c[l])
+                    x_out, c = self.rnn[l].forward(x_in, h[l], c[l])
 
                 else:
                     raise ValueError(f"Unknown RNN type {self.rnn_type}")
-        
-        outs = h     # hidden states computed at last layer
+
+                # after finisihing computing activation for layer l
+                # we can use this as the hidden state input for the next layer l+1
+                x_in = x_out                            # shape should be (B x n)
+                new_h[l] = x_out                        # shape (B x m)
+                # change c!!!
+
+            # after computing all the activations for time step t
+            # we can compute the information from the current time step to be used for the next time step
+            h = new_h                                   # update h to be the hidden state of the current time step
+            outs[:, t, :] = x_out                       # add this time step's final layer's x_out, hidden state, (B x m)
+
         return outs, h, c

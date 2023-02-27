@@ -26,16 +26,13 @@ class BasicRNNCell(nn.Module):
 
         # W, the input weights matrix has size (n x m) where n is
         # the number of input features and m is the hidden size
-        W = torch.empty((n, m))
-        self.W = W.uniform_(-k, k)
+        self.W = nn.parameter.Parameter(torch.empty((n, m)).uniform_(-k, k))
 
         # V, the hidden state weights matrix has size (m, m)
-        V = torch.empty((m, m))
-        self.V = V.uniform_(-k, k)
+        self.V = nn.parameter.Parameter(torch.empty((m, m)).uniform_(-k, k))
 
         # b, the vector of bias, has size (m)
-        b = torch.empty(m)
-        self.b = b.uniform_(-k, k)
+        self.b = nn.parameter.Parameter(torch.empty(m).uniform_(-k, k))
 
     def forward(self, x, h):
         """
@@ -45,14 +42,15 @@ class BasicRNNCell(nn.Module):
         ---------
         x: (Tensor) of size (B x n) where B is the mini-batch size and n is the number of input features. x is
             the input data of the current time-step. In a multi-layer RNN, x is the previous layer's hidden state
-        h: (Tensor) of size (B x m) where m is the hidden size. h is the hidden state of the previous layer
+        h: (Tensor) of size (B x m) where m is the hidden size. h is the hidden state of the previous time step
 
         Return
         ------
         h: (Tensor) of size (B x m), the new hidden state
 
         """
-        a = self.b + self.W * x + self.V * h
+
+        a = self.b + torch.mm(x, self.W) + torch.mm(h, self.V)
         h = tanh(a)
 
         return h

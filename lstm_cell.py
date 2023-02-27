@@ -26,16 +26,13 @@ class LSTMCell(nn.Module):
 
         # W, the input weights matrix has size (n x (4 * m)) where n is
         # the number of input features and m is the hidden size
-        W = torch.empty((n, m))
-        self.W = W.uniform_(-k, k)
+        self.W = nn.parameter.Parameter(torch.empty((n, p)).uniform_(-k, k))
 
         # V, the hidden state weights matrix has size (m, (4 * m))
-        V = torch.empty((m, m))
-        self.V = V.uniform_(-k, k)
+        self.V = nn.parameter.Parameter(torch.empty((m, p)).uniform_(-k, k))
 
         # b, the vector of biases has size (4 * m)
-        b = torch.empty(m)
-        self.b = b.uniform_(-k, k)
+        self.b = nn.parameter.Parameter(torch.empty(p).uniform_(-k, k))
 
     def forward(self, x, h, c):
         """
@@ -55,7 +52,8 @@ class LSTMCell(nn.Module):
         c_out: (Tensor) of size (B x m), he new cell state
 
         """
-        a = self.b + self.W*x + self.V*h
+        a = self.b + torch.mm(x, self.W) + torch.mm(h, self.V)
+        print(a.shape)
         i = sigmoid(a[0])
         f = sigmoid(a[1])
         o = sigmoid(a[2])
