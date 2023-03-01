@@ -53,11 +53,12 @@ class LSTMCell(nn.Module):
 
         """
         a = self.b + torch.mm(x, self.W) + torch.mm(h, self.V)
-        print(a.shape)
-        i = sigmoid(a[0])
-        f = sigmoid(a[1])
-        o = sigmoid(a[2])
-        g = tanh(a[3])
+        a_s = a.split(int(self.W.shape[1]/4), 1)
+
+        i = sigmoid(a_s[0])
+        f = sigmoid(a_s[1])
+        o = sigmoid(a_s[2])
+        g = tanh(a_s[3])
 
         c_out = torch.mul(i, g) + torch.mul(f, c)
         h_out = torch.mul(o, tanh(c_out))

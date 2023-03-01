@@ -78,7 +78,7 @@ def text_generation(rnn_type='basic_rnn', input_file="shakespeare.txt", sample_l
 if __name__ == '__main__':
     parser = ArgumentParser()
     # change to "lstm_rnn for an lstm cell
-    parser.add_argument("--rnn_type", default="basic_rnn", type=str, help="Specify rnn type")
+    parser.add_argument("--rnn_type", default="lstm_rnn", type=str, help="Specify rnn type")
     parser.add_argument("--input_file", default="shakespeare.txt", type=str, help="The source corpus")
     parser.add_argument("--sample_len", default=2000, type=int, help="The length of text to generate")
     parser.add_argument("--seed", default="KING LEAR", type=str, help="The seed text")

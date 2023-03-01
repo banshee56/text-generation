@@ -62,16 +62,18 @@ class CustomRNN(nn.Module):
         # for each time step, we start with one input
         for t in range(x.shape[1]):
             x_in = x[:, t, :]           # input volume x_t at time step t, shape (B x n)
-            new_h = zeros((h.shape))    # store hidden states computed at this time step, shape (l x B x m)
+            new_h = zeros(h.shape)      # store hidden states computed at this time step, shape (l x B x m)
+            new_c = zeros(c.shape)
 
             for l in range(self.num_layers):
                 if self.rnn_type == "basic_rnn":
                     # first parameter: the activation from the previous layer, shape (B x n)
                     # second parameter: the hidden state from the previous time step, shape (B x m)
-                    x_out = self.rnn[l].forward(x_in, h[l])                   # x_out shape (B x m)
+                    x_out = self.rnn[l].forward(x_in, h[l])                     # x_out shape (B x m)
 
                 elif self.rnn_type == "lstm_rnn":
-                    x_out, c = self.rnn[l].forward(x_in, h[l], c[l])
+                    x_out, c_out = self.rnn[l].forward(x_in, h[l], c[l])
+                    new_c[l] = c_out                                            # update c, similar to updating h
 
                 else:
                     raise ValueError(f"Unknown RNN type {self.rnn_type}")
@@ -80,11 +82,11 @@ class CustomRNN(nn.Module):
                 # we can use this as the hidden state input for the next layer l+1
                 x_in = x_out                            # shape should be (B x n)
                 new_h[l] = x_out                        # shape (B x m)
-                # change c!!!
 
             # after computing all the activations for time step t
             # we can compute the information from the current time step to be used for the next time step
-            h = new_h                                   # update h to be the hidden state of the current time step
             outs[:, t, :] = x_out                       # add this time step's final layer's x_out, hidden state, (B x m)
+            h = new_h                                   # update h to be the hidden state of the current time step
+            c = new_c
 
         return outs, h, c
