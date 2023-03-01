@@ -53,8 +53,9 @@ class LSTMCell(nn.Module):
 
         """
         a = self.b + torch.mm(x, self.W) + torch.mm(h, self.V)
-        a_s = a.split(int(self.W.shape[1]/4), 1)
+        a_s = a.split(int(self.W.shape[1]/4), 1)        # split the output into shapes of size (n, m)
 
+        # create the gates
         i = sigmoid(a_s[0])
         f = sigmoid(a_s[1])
         o = sigmoid(a_s[2])
